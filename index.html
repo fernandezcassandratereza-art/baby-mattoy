@@ -99,29 +99,6 @@
             background: rgba(255, 255, 255, 0.5);
             cursor: not-allowed;
         }
-        .customize-quiz {
-            margin-bottom: 20px;
-            display: none; /* Hidden for receiver */
-            width: 100%;
-            max-width: 600px;
-        }
-        .quiz-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ff69b4;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.8);
-        }
-        .quiz-item input, .quiz-item select {
-            width: 100%;
-            margin: 5px 0;
-            padding: 5px;
-            border: 1px solid #ff69b4;
-            border-radius: 5px;
-        }
-        .add-question {
-            margin-top: 10px;
-        }
         .controls {
             display: flex;
             justify-content: space-around;
@@ -144,52 +121,6 @@
         button:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .game {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            padding: 20px;
-            display: none;
-            width: 100%;
-            max-width: 600px;
-        }
-        .quiz-question {
-            margin-bottom: 20px;
-        }
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .quiz-option {
-            background: #ff69b4;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .quiz-option:hover {
-            background: #a8e6cf;
-        }
-        .score {
-            font-size: 1.5rem;
-            color: #ff69b4;
-            margin-top: 20px;
-        }
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ff69b4;
-            border-radius: 50%;
-            animation: burst 1s ease-out forwards;
-        }
-        @keyframes burst {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(10); opacity: 0; }
         }
         .bg-upload {
             margin-bottom: 20px;
@@ -228,19 +159,8 @@
                 <textarea id="letterText" placeholder="Write your heartfelt message here..."></textarea>
                 <div class="read-only" id="readOnlyLetter" style="display: none;"></div>
             </div>
-            <div class="customize-quiz" id="customizeQuiz">
-                <h3 style="color: #ff69b4;">Customize Your Love Quiz</h3>
-                <div id="quizItems"></div>
-                <button class="add-question" onclick="addQuestion()">Add Question</button>
-            </div>
             <div class="controls">
                 <button id="saveBtn">Save & Share</button>
-                <button id="playGameBtn">Play Love Quiz</button>
-            </div>
-            <div class="game" id="game">
-                <div class="quiz-question" id="question"></div>
-                <div class="quiz-options" id="options"></div>
-                <div class="score" id="score">Score: 0</div>
             </div>
         </div>
     </div>
@@ -259,101 +179,30 @@
 
         // Check if read-only (URL param)
         const urlParams = new URLSearchParams(window.location.search);
-        const encodedLetter = urlParams.get('letter');
-        const encodedQuiz = urlParams.get('quiz');
-        let customQuestions = [];
+        const encodedLetter = decodeURIComponent(urlParams.get('letter') || '');
         if (encodedLetter) {
             document.getElementById('letterText').style.display = 'none';
             document.getElementById('readOnlyLetter').style.display = 'block';
-            document.getElementById('readOnlyLetter').innerText = atob(encodedLetter);
+            try {
+                document.getElementById('readOnlyLetter').innerText = atob(encodedLetter);
+            } catch (e) {
+                // Silent error handling
+            }
             document.getElementById('saveBtn').style.display = 'none';
             document.getElementById('bgInput').style.display = 'none';
             document.querySelector('.bg-upload button').style.display = 'none';
-            document.getElementById('customizeQuiz').style.display = 'none';
-            if (encodedQuiz) {
-                try {
-                    customQuestions = JSON.parse(atob(encodedQuiz));
-                } catch (e) {
-                    // Silent error handling
-                }
-            }
         } else {
             // Load from localStorage
             const saved = localStorage.getItem('loveLetter');
             if (saved) document.getElementById('letterText').value = saved;
-            const savedQuiz = localStorage.getItem('customQuiz');
-            if (savedQuiz) {
-                try {
-                    customQuestions = JSON.parse(savedQuiz);
-                    loadQuizItems();
-                } catch (e) {
-                    // Silent error handling
-                }
-            }
-            document.getElementById('customizeQuiz').style.display = 'block';
-        }
-
-        // Customize Quiz
-        function addQuestion() {
-            const item = document.createElement('div');
-            item.className = 'quiz-item';
-            item.innerHTML = `
-                <input type="text" placeholder="Question" class="question">
-                <input type="text" placeholder="Option 1" class="option1">
-                <input type="text" placeholder="Option 2" class="option2">
-                <input type="text" placeholder="Option 3" class="option3">
-                <input type="text" placeholder="Option 4" class="option4">
-                <select class="correct">
-                    <option value="0">Correct: Option 1</option>
-                    <option value="1">Correct: Option 2</option>
-                    <option value="2">Correct: Option 3</option>
-                    <option value="3">Correct: Option 4</option>
-                </select>
-                <button onclick="removeQuestion(this)">Remove</button>
-            `;
-            document.getElementById('quizItems').appendChild(item);
-        }
-        function removeQuestion(btn) {
-            btn.parentElement.remove();
-        }
-        function loadQuizItems() {
-            customQuestions.forEach(q => {
-                addQuestion();
-                const items = document.querySelectorAll('.quiz-item');
-                const last = items[items.length - 1];
-                last.querySelector('.question').value = q.question;
-                last.querySelector('.option1').value = q.options[0];
-                last.querySelector('.option2').value = q.options[1];
-                last.querySelector('.option3').value = q.options[2];
-                last.querySelector('.option4').value = q.options[3];
-                last.querySelector('.correct').value = q.correct;
-            });
         }
 
         // Save and share
         document.getElementById('saveBtn').addEventListener('click', () => {
             const text = document.getElementById('letterText').value;
             localStorage.setItem('loveLetter', text);
-            // Save custom quiz
-            const items = document.querySelectorAll('.quiz-item');
-            customQuestions = [];
-            items.forEach(item => {
-                const q = item.querySelector('.question').value;
-                const opts = [
-                    item.querySelector('.option1').value,
-                    item.querySelector('.option2').value,
-                    item.querySelector('.option3').value,
-                    item.querySelector('.option4').value
-                ];
-                const correct = parseInt(item.querySelector('.correct').value);
-                if (q && opts.every(o => o)) {
-                    customQuestions.push({ question: q, options: opts, correct });
-                }
-            });
-            localStorage.setItem('customQuiz', JSON.stringify(customQuestions));
             const encoded = btoa(text);
-            const encodedQ = btoa(JSON.stringify(customQuestions));
-            const url = window.location.origin + window.location.pathname + '?letter=' + encoded + '&quiz=' + encodedQ;
+            const url = window.location.origin + window.location.pathname + '?letter=' + encodeURIComponent(encoded);
             navigator.clipboard.writeText(url).then(() => {
                 alert('Link copied to clipboard!');
             }).catch(() => {
@@ -373,57 +222,6 @@
                 };
                 reader.readAsDataURL(file);
             }
-        });
-
-        // Love Quiz Game
-        let currentQuestion = 0;
-        let score = 0;
-        const questions = customQuestions.length > 0 ? customQuestions : [
-            { question: "What's my favorite color?", options: ["Red", "Blue", "Green", "Yellow"], correct: 0 },
-            { question: "Where did we first meet?", options: ["Park", "School", "Mall", "Online"], correct: 1 },
-            { question: "What's my dream date?", options: ["Beach", "Movies", "Dinner", "Hiking"], correct: 2 },
-            { question: "How many kids do I want?", options: ["1", "2", "3", "None"], correct: 1 },
-            { question: "What's my love language?", options: ["Words", "Acts", "Gifts", "Time"], correct: 0 }
-        ];
-        function loadQuestion() {
-            if (currentQuestion >= questions.length) {
-                document.getElementById('question').innerText = "Quiz Complete!";
-                document.getElementById('options').innerHTML = "";
-                document.getElementById('score').innerText = "Final Score: " + score + "/" + questions.length;
-                // Confetti burst
-                for (let i = 0; i < 50; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.top = Math.random() * 100 + '%';
-                    confetti.style.animationDelay = Math.random() * 1 + 's';
-                    document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 1000);
-                }
-                return;
-            }
-            const q = questions[currentQuestion];
-            document.getElementById('question').innerText = q.question;
-            document.getElementById('options').innerHTML = "";
-            q.options.forEach((option, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-option';
-                btn.innerText = option;
-                btn.addEventListener('click', () => {
-                    if (index === q.correct) score++;
-                    document.getElementById('score').innerText = "Score: " + score;
-                    currentQuestion++;
-                    loadQuestion();
-                });
-                document.getElementById('options').appendChild(btn);
-            });
-        }
-        document.getElementById('playGameBtn').addEventListener('click', () => {
-            document.getElementById('game').style.display = 'block';
-            currentQuestion = 0;
-            score = 0;
-            document.getElementById('score').innerText = "Score: 0";
-            loadQuestion();
         });
     </script>
 </body>
