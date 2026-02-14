@@ -180,6 +180,7 @@
         // Check if read-only (URL param)
         const urlParams = new URLSearchParams(window.location.search);
         const encodedLetter = decodeURIComponent(urlParams.get('letter') || '');
+        const encodedBg = decodeURIComponent(urlParams.get('bg') || '');
         if (encodedLetter) {
             document.getElementById('letterText').style.display = 'none';
             document.getElementById('readOnlyLetter').style.display = 'block';
@@ -191,10 +192,26 @@
             document.getElementById('saveBtn').style.display = 'none';
             document.getElementById('bgInput').style.display = 'none';
             document.querySelector('.bg-upload button').style.display = 'none';
+            // Set custom background if provided
+            if (encodedBg) {
+                try {
+                    document.body.style.backgroundImage = `url(${atob(encodedBg)})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                } catch (e) {
+                    // Silent error handling
+                }
+            }
         } else {
             // Load from localStorage
             const saved = localStorage.getItem('loveLetter');
             if (saved) document.getElementById('letterText').value = saved;
+            const savedBg = localStorage.getItem('customBg');
+            if (savedBg) {
+                document.body.style.backgroundImage = `url(${savedBg})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+            }
         }
 
         // Save and share
@@ -202,7 +219,17 @@
             const text = document.getElementById('letterText').value;
             localStorage.setItem('loveLetter', text);
             const encoded = btoa(text);
-            const url = window.location.origin + window.location.pathname + '?letter=' + encodeURIComponent(encoded);
+            // Get current background image
+            const bgImage = getComputedStyle(document.body).backgroundImage;
+            let encodedBg = '';
+            if (bgImage && bgImage !== 'none' && bgImage.includes('url(')) {
+                const urlMatch = bgImage.match(/url\$"(.+)"\$/);
+                if (urlMatch && urlMatch[1]) {
+                    encodedBg = btoa(urlMatch[1]);
+                    localStorage.setItem('customBg', urlMatch[1]);
+                }
+            }
+            const url = window.location.origin + window.location.pathname + '?letter=' + encodeURIComponent(encoded) + (encodedBg ? '&bg=' + encodeURIComponent(encodedBg) : '');
             navigator.clipboard.writeText(url).then(() => {
                 alert('Link copied to clipboard!');
             }).catch(() => {
@@ -219,6 +246,7 @@
                     document.body.style.backgroundImage = `url(${reader.result})`;
                     document.body.style.backgroundSize = 'cover';
                     document.body.style.backgroundPosition = 'center';
+                    localStorage.setItem('customBg', reader.result);
                 };
                 reader.readAsDataURL(file);
             }
