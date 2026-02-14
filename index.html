@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romantic Love App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #a8e6cf, #ffd3a5, #ffaaa5, #dcedc8);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .heart {
+            position: absolute;
+            color: #ff69b4;
+            font-size: 2rem;
+            animation: float 6s linear infinite;
+            opacity: 0.7;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+        .main {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            animation: slideUp 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .letter {
+            margin-bottom: 20px;
+            animation: fadeInLetter 2s ease-in-out;
+            width: 100%;
+            max-width: 600px;
+        }
+        @keyframes fadeInLetter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        textarea, .read-only {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ff69b4;
+            border-radius: 15px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.2rem;
+            resize: vertical;
+            background: rgba(255, 255, 255, 0.8);
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            border-color: #a8e6cf;
+            outline: none;
+        }
+        .read-only {
+            background: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
+        .customize-quiz {
+            margin-bottom: 20px;
+            display: none; /* Hidden for receiver */
+            width: 100%;
+            max-width: 600px;
+        }
+        .quiz-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ff69b4;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .quiz-item input, .quiz-item select {
+            width: 100%;
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #ff69b4;
+            border-radius: 5px;
+        }
+        .add-question {
+            margin-top: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        button {
+            background: linear-gradient(45deg, #ff69b4, #a8e6cf);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .game {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            display: none;
+            width: 100%;
+            max-width: 600px;
+        }
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .quiz-option {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .quiz-option:hover {
+            background: #a8e6cf;
+        }
+        .score {
+            font-size: 1.5rem;
+            color: #ff69b4;
+            margin-top: 20px;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff69b4;
+            border-radius: 50%;
+            animation: burst 1s ease-out forwards;
+        }
+        @keyframes burst {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(10); opacity: 0; }
+        }
+        .bg-upload {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 182, 193, 0.3);
+            pointer-events: none;
+            z-index: -1;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .main { margin: 10px; }
+            textarea, .read-only { font-size: 1rem; }
+            .controls { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="hearts"></div>
+    <div class="bg-overlay" id="bgOverlay"></div>
+    <div class="container">
+        <div class="main" id="main">
+            <div class="bg-upload">
+                <input type="file" id="bgInput" accept="image/*" style="display: none;">
+                <button onclick="document.getElementById('bgInput').click()">Choose Background</button>
+            </div>
+            <div class="letter">
+                <h2 style="color: #ff69b4;">Your Love Letter</h2>
+                <textarea id="letterText" placeholder="Write your heartfelt message here..."></textarea>
+                <div class="read-only" id="readOnlyLetter" style="display: none;"></div>
+            </div>
+            <div class="customize-quiz" id="customizeQuiz">
+                <h3 style="color: #ff69b4;">Customize Your Love Quiz</h3>
+                <div id="quizItems"></div>
+                <button class="add-question" onclick="addQuestion()">Add Question</button>
+            </div>
+            <div class="controls">
+                <button id="saveBtn">Save & Share</button>
+                <button id="playGameBtn">Play Love Quiz</button>
+            </div>
+            <div class="game" id="game">
+                <div class="quiz-question" id="question"></div>
+                <div class="quiz-options" id="options"></div>
+                <div class="score" id="score">Score: 0</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Floating hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (Math.random() * 4 + 2) + 's';
+            document.getElementById('hearts').appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+        setInterval(createHeart, 1000);
+
+        // Check if read-only (URL param)
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedLetter = urlParams.get('letter');
+        const encodedQuiz = urlParams.get('quiz');
+        let customQuestions = [];
+        if (encodedLetter) {
+            document.getElementById('letterText').style.display = 'none';
+            document.getElementById('readOnlyLetter').style.display = 'block';
+            document.getElementById('readOnlyLetter').innerText = atob(encodedLetter);
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('bgInput').style.display = 'none';
+            document.querySelector('.bg-upload button').style.display = 'none';
+            document.getElementById('customizeQuiz').style.display = 'none';
+            if (encodedQuiz) {
+                try {
+                    customQuestions = JSON.parse(atob(encodedQuiz));
+                } catch (e) {
+                    // Silent error handling
+                }
+            }
+        } else {
+            // Load from localStorage
+            const saved = localStorage.getItem('loveLetter');
+            if (saved) document.getElementById('letterText').value = saved;
+            const savedQuiz = localStorage.getItem('customQuiz');
+            if (savedQuiz) {
+                try {
+                    customQuestions = JSON.parse(savedQuiz);
+                    loadQuizItems();
+                } catch (e) {
+                    // Silent error handling
+                }
+            }
+            document.getElementById('customizeQuiz').style.display = 'block';
+        }
+
+        // Customize Quiz
+        function addQuestion() {
+            const item = document.createElement('div');
+            item.className = 'quiz-item';
+            item.innerHTML = `
+                <input type="text" placeholder="Question" class="question">
+                <input type="text" placeholder="Option 1" class="option1">
+                <input type="text" placeholder="Option 2" class="option2">
+                <input type="text" placeholder="Option 3" class="option3">
+                <input type="text" placeholder="Option 4" class="option4">
+                <select class="correct">
+                    <option value="0">Correct: Option 1</option>
+                    <option value="1">Correct: Option 2</option>
+                    <option value="2">Correct: Option 3</option>
+                    <option value="3">Correct: Option 4</option>
+                </select>
+                <button onclick="removeQuestion(this)">Remove</button>
+            `;
+            document.getElementById('quizItems').appendChild(item);
+        }
+        function removeQuestion(btn) {
+            btn.parentElement.remove();
+        }
+        function loadQuizItems() {
+            customQuestions.forEach(q => {
+                addQuestion();
+                const items = document.querySelectorAll('.quiz-item');
+                const last = items[items.length - 1];
+                last.querySelector('.question').value = q.question;
+                last.querySelector('.option1').value = q.options[0];
+                last.querySelector('.option2').value = q.options[1];
+                last.querySelector('.option3').value = q.options[2];
+                last.querySelector('.option4').value = q.options[3];
+                last.querySelector('.correct').value = q.correct;
+            });
+        }
+
+        // Save and share
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const text = document.getElementById('letterText').value;
+            localStorage.setItem('loveLetter', text);
+            // Save custom quiz
+            const items = document.querySelectorAll('.quiz-item');
+            customQuestions = [];
+            items.forEach(item => {
+                const q = item.querySelector('.question').value;
+                const opts = [
+                    item.querySelector('.option1').value,
+                    item.querySelector('.option2').value,
+                    item.querySelector('.option3').value,
+                    item.querySelector('.option4').value
+                ];
+                const correct = parseInt(item.querySelector('.correct').value);
+                if (q && opts.every(o => o)) {
+                    customQuestions.push({ question: q, options: opts, correct });
+                }
+            });
+            localStorage.setItem('customQuiz', JSON.stringify(customQuestions));
+            const encoded = btoa(text);
+            const encodedQ = btoa(JSON.stringify(customQuestions));
+            const url = window.location.origin + window.location.pathname + '?letter=' + encoded + '&quiz=' + encodedQ;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(() => {
+                // Silent error handling
+            });
+        });
+
+        // Background image
+        document.getElementById('bgInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    document.body.style.backgroundImage = `url(${reader.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Love Quiz Game
+        let currentQuestion = 0;
+        let score = 0;
+        const questions = customQuestions.length > 0 ? customQuestions : [
+            { question: "What's my favorite color?", options: ["Red", "Blue", "Green", "Yellow"], correct: 0 },
+            { question: "Where did we first meet?", options: ["Park", "School", "Mall", "Online"], correct: 1 },
+            { question: "What's my dream date?", options: ["Beach", "Movies", "Dinner", "Hiking"], correct: 2 },
+            { question: "How many kids do I want?", options: ["1", "2", "3", "None"], correct: 1 },
+            { question: "What's my love language?", options: ["Words", "Acts", "Gifts", "Time"], correct: 0 }
+        ];
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                document.getElementById('question').innerText = "Quiz Complete!";
+                document.getElementById('options').innerHTML = "";
+                document.getElementById('score').innerText = "Final Score: " + score + "/" + questions.length;
+                // Confetti burst
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = Math.random() * 100 + '%';
+                    confetti.style.animationDelay = Math.random() * 1 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 1000);
+                }
+                return;
+            }
+            const q = questions[currentQuestion];
+            document.getElementById('question').innerText = q.question;
+            document.getElementById('options').innerHTML = "";
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerText = option;
+                btn.addEventListener('click', () => {
+                    if (index === q.correct) score++;
+                    document.getElementById('score').innerText = "Score: " + score;
+                    currentQuestion++;
+                    loadQuestion();
+                });
+                document.getElementById('options').appendChild(btn);
+            });
+        }
+        document.getElementById('playGameBtn').addEventListener('click', () => {
+            document.getElementById('game').style.display = 'block';
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('score').innerText = "Score: 0";
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>
